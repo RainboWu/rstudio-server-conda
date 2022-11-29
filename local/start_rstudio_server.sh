@@ -13,7 +13,7 @@ rm -f $COOKIE_KEY_PATH
 mkdir -p $(dirname $COOKIE_KEY_PATH)
 
 # Rserver >= version 1.3 requires the --auth-revocation-list-dir parameter
-if [ $(sed -n '/^1.3./p;q' /usr/lib/rstudio-server/VERSION) ] ;
+if [ $(sed -n '/^1.3./p;q' $HOME/rstudio-server/VERSION) ] ;
 then
   REVOCATION_LIST_DIR=/tmp/rstudio-server/${USER}_revocation-list-dir
   mkdir -p $REVOCATION_LIST_DIR
@@ -32,11 +32,16 @@ echo "## Current env is >>"
 echo $CONDA_PREFIX
 echo $CONDA_PREFIX > $CONDA_ENV_PATH
 
+if [ ! -f $HOME/rstudio-server/extras/conf/${USER}_database.conf ]; then
+  echo directory=/tmp/rstudio-server/${USER} > $HOME/rstudio-server/extras/conf/${USER}_database.conf
+fi
+
 export RETICULATE_PYTHON=$CONDA_PREFIX/bin/python
 
-/usr/lib/rstudio-server/bin/rserver --server-daemonize=0 \
+$HOME/rstudio-server/bin/rserver --server-daemonize=0 \
   --www-port=$1 \
   --secure-cookie-key-file=$COOKIE_KEY_PATH \
+  --database-config-file=$HOME/rstudio-server/extras/conf/${USER}_database.conf \
   --rsession-which-r=$(which R) \
   --rsession-ld-library-path=$CONDA_PREFIX/lib \
   --rsession-path="$CWD/rsession.sh" \
